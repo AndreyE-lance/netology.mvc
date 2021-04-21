@@ -1,5 +1,12 @@
-//Извлекаем запись
-GET http://localhost:9999/api/posts/1
+###
+//смотрим запись
+GET http://localhost:9999/api/posts/show?id=1
+
+
+###
+//удаляем запись
+DELETE http://localhost:9999/api/posts/del?id=1
+
 
 ###
 
@@ -9,5 +16,6 @@ Content-Type: application/json
 
 {
   "id": 0,
-  "content": "Last Post"
+  "content": "Last Post3"
 }
+

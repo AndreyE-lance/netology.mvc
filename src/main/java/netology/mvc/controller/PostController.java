@@ -1,7 +1,10 @@
 package netology.mvc.controller;
 
+import netology.mvc.exception.NotFoundException;
 import netology.mvc.model.Post;
 import netology.mvc.service.PostService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,18 +24,30 @@ public class PostController {
         return service.all();
     }
 
-    @GetMapping("/{id}")
-    public Post getById(@PathVariable long id) {
-        return service.getById(id);
+    @GetMapping("/show")
+    public ResponseEntity<Post> getById(@RequestParam(value="id") long id) {
+        Post p = null;
+        try {
+           p = service.getById(id);
+        } catch (NotFoundException e){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(p, HttpStatus.OK);
     }
 
     @PostMapping
-    public Post save(@RequestBody Post post) {
-        return service.save(post);
+    public ResponseEntity<Post> save(@RequestBody Post post) {
+        Post p = null;
+        try {
+            p = service.save(post);
+        } catch (NotFoundException e){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(p, HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id}")
-    public void removeById(long id) {
+    @DeleteMapping("/del")
+    public void removeById(@RequestParam(value="id") long id) {
         service.removeById(id);
     }
 }

@@ -1,7 +1,7 @@
 package netology.mvc.repository;
 
+import netology.mvc.exception.NotFoundException;
 import netology.mvc.model.Post;
-
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -15,25 +15,35 @@ public class PostRepository {
     private AtomicInteger postID = new AtomicInteger(0);
 
     public List<Post> all() {
-        return postList;
+        List<Post> posts = new CopyOnWriteArrayList<>();
+        posts.forEach(p -> {
+            if (!p.isDeleted()) posts.add(p);
+        });
+        return posts;
     }
 
-    public Optional<Post> getById(long id) {
+    public Optional<Post> getById(long id) throws NotFoundException{
         Post post = null;
         for (Post p : postList) {
-            if (p.getId() == id) post = p;
+            if (p.getId() == id) {
+                if (!p.isDeleted())
+                    post = p;
+                else throw new NotFoundException("Пост удален.");
+            }
         }
         return Optional.ofNullable(post);
     }
 
-    public Post save(Post post) {
+    public Post save(Post post) throws NotFoundException{
         if (post.getId() == 0) {
             postID.getAndIncrement();
             post.setId(postID.get());
         } else {
             for (Post p : postList) {
                 if (p.getId() == post.getId()) {
-                    p.setContent(post.getContent());
+                    if (!p.isDeleted())
+                        p.setContent(post.getContent());
+                    else throw new NotFoundException("Нельзя обновить удаленный пост.");
                 } else {
                     postID.getAndIncrement();
                     post.setId(postID.get());
@@ -45,6 +55,11 @@ public class PostRepository {
     }
 
     public void removeById(long id) {
-        postList.removeIf(p -> p.getId() == id);
+        //postList.removeIf(p -> p.getId() == id);
+        for (Post p : postList) {
+            if (p.getId() == id) {
+                p.setDeleted(true);
+            }
+        }
     }
 }
